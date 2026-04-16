@@ -1,5 +1,5 @@
 """
-localOCR - Local OCR text extraction from images using HuggingFace GLM-OCR
+localOCR - Local OCR text extraction from images using EasyOCR
 """
 
 __version__ = "0.1.0"

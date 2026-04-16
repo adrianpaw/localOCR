@@ -1,6 +1,6 @@
 # localOCR Project Setup
 
-Project: Local OCR text extraction from images using HuggingFace GLM-OCR model
+Project: Local OCR text extraction from images using EasyOCR
 
 ## Setup Checklist
 
@@ -14,7 +14,7 @@ Project: Local OCR text extraction from images using HuggingFace GLM-OCR model
 ## Project Details
 
 - **Type**: Python Project
-- **Purpose**: Extract text from images using GLM-OCR from Hugging Face
+- **Purpose**: Extract text from images using EasyOCR
 - **Main Dependencies**: 
   - transformers (from git)
   - torch

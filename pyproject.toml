@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "localocr"
 version = "0.1.0"
-description = "Local OCR text extraction from images using HuggingFace GLM-OCR model"
+description = "Local OCR text extraction from images and PDFs using EasyOCR"
 requires-python = ">=3.8"
 dependencies = [
     "transformers @ git+https://github.com/huggingface/transformers.git",

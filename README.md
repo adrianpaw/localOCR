@@ -1,15 +1,15 @@
 # localOCR
 
-Local OCR text extraction from images and PDFs using HuggingFace GLM-OCR model.
+Local OCR text extraction from images and PDFs using EasyOCR.
 
 ## Overview
 
-This project provides a Python-based OCR (Optical Character Recognition) system that extracts text from images and PDF files locally using the GLM-OCR model from Hugging Face. No cloud services or API keys required - everything runs on your machine.
+This project provides a Python-based OCR (Optical Character Recognition) system that extracts text from images and PDF files locally using EasyOCR. No cloud services or API keys required - everything runs on your machine.
 
 ## Features
 
 - **Local Processing**: Extract text entirely on your machine
-- **HuggingFace Integration**: Uses the state-of-the-art GLM-OCR model
+- **EasyOCR Integration**: Uses the EasyOCR engine
 - **GPU Support**: Automatically uses GPU if available
 - **Batch Processing**: Extract text from multiple images/PDFs efficiently
 - **Easy-to-Use API**: Simple Python interface for integration into other projects
@@ -102,8 +102,8 @@ for i, text in enumerate(texts):
 ```python
 from localocr import OCRExtractor
 
-# Use a different model from HuggingFace
-extractor = OCRExtractor(model_name="another-model-id")
+# Use different languages with EasyOCR
+extractor = OCRExtractor(languages=['en', 'ru'])  # Specify languages
 text = extractor.extract_text("image.jpg")
 ```
 
@@ -123,7 +123,7 @@ GET /api/model-info
 Returns:
 ```json
 {
-    "model": "zai-org/GLM-OCR",
+    "model": "EasyOCR",
     "device": "cuda" or "cpu"
 }
 ```
@@ -166,9 +166,9 @@ localOCR/
 
 ## Model Information
 
-- **Model Name**: zai-org/GLM-OCR
-- **Source**: [HuggingFace Model Hub](https://huggingface.co/zai-org/GLM-OCR)
-- **Type**: Vision Language Model for OCR
+- **Model Name**: EasyOCR
+- **Source**: [EasyOCR GitHub](https://github.com/JaidedAI/EasyOCR)
+- **Type**: OCR engine based on deep learning
 
 ## Performance Notes
 
@@ -218,6 +218,6 @@ Contributions are welcome! Please feel free to submit pull requests.
 
 ## References
 
-- [GLM-OCR on HuggingFace](https://huggingface.co/zai-org/GLM-OCR)
+- [EasyOCR on GitHub](https://github.com/JaidedAI/EasyOCR)
 - [Transformers Library](https://huggingface.co/docs/transformers/)
 - [PyTorch Documentation](https://pytorch.org/docs/)
