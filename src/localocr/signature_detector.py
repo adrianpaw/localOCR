@@ -7,9 +7,6 @@ import cv2
 import numpy as np
 from typing import List, Tuple, Optional, Dict, Any
 import logging
-from pathlib import Path
-from PIL import Image
-import tempfile
 import os
 
 logger = logging.getLogger(__name__)
@@ -306,7 +303,6 @@ class SignatureDetector:
 
 def test_detector():
     """Тестирование детектора на примере."""
-    import matplotlib.pyplot as plt
     
     # Создаем тестовое изображение с простой "подписью"
     test_image = np.ones((300, 400, 3), dtype=np.uint8) * 255

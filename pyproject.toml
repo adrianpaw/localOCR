@@ -8,7 +8,6 @@ version = "0.1.0"
 description = "Local OCR text extraction from images and PDFs using EasyOCR"
 requires-python = ">=3.8"
 dependencies = [
-    "transformers @ git+https://github.com/huggingface/transformers.git",
     "torch>=2.0.0",
     "Pillow>=9.0.0",
     "numpy>=1.21.0",

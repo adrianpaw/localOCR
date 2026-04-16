@@ -88,7 +88,6 @@ def secure_filename_unicode(filename):
     
     # Clean the name part: keep Unicode letters, digits, spaces, dots, dashes, underscores
     # Remove potentially dangerous characters
-    import re
     # This regex keeps Unicode word characters, spaces, dots, dashes, underscores
     name_part = re.sub(r'[^\w\s\.\-_]', '', name_part, flags=re.UNICODE)
     # Replace multiple spaces with single underscore
