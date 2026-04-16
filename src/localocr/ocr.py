@@ -5,11 +5,18 @@ OCR Extractor module using EasyOCR for text extraction from images and PDFs.
 import easyocr
 import numpy as np
 from PIL import Image
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Dict, Any
 from pathlib import Path
 import logging
 import os
 import tempfile
+
+try:
+    from .signature_detector import SignatureDetector
+    SIGNATURE_DETECTION_AVAILABLE = True
+except ImportError:
+    SIGNATURE_DETECTION_AVAILABLE = False
+    SignatureDetector = None
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +54,118 @@ class OCRExtractor:
             return torch.cuda.is_available()
         except ImportError:
             return False
+
+    def _init_signature_detector(self) -> Optional[Any]:
+        """Initialize signature detector if available."""
+        if not SIGNATURE_DETECTION_AVAILABLE:
+            logger.warning("Signature detection not available. Install OpenCV and ensure signature_detector module is accessible.")
+            return None
+        
+        try:
+            self.signature_detector = SignatureDetector()
+            logger.info("Signature detector initialized successfully.")
+            return self.signature_detector
+        except Exception as e:
+            logger.error(f"Failed to initialize signature detector: {e}")
+            return None
+
+    def detect_signatures(self, file_path: Union[str, Path]) -> List[Dict[str, Any]]:
+        """
+        Detect signatures in an image or PDF file.
+        
+        Args:
+            file_path: Path to the image or PDF file
+            
+        Returns:
+            List of dictionaries with signature information
+        """
+        if not hasattr(self, 'signature_detector') or self.signature_detector is None:
+            self._init_signature_detector()
+        
+        if self.signature_detector is None:
+            return []
+        
+        file_path = str(file_path)
+        
+        if self._is_pdf(file_path):
+            # Для PDF нужно обработать каждую страницу отдельно
+            return self._detect_signatures_in_pdf(file_path)
+        else:
+            # Для изображений - прямое обнаружение
+            try:
+                return self.signature_detector.detect_signatures(file_path)
+            except Exception as e:
+                logger.error(f"Error detecting signatures in image: {e}")
+                return []
+
+    def _detect_signatures_in_pdf(self, pdf_path: str) -> List[Dict[str, Any]]:
+        """Detect signatures in PDF file by converting pages to images."""
+        if self.signature_detector is None:
+            return []
+        
+        try:
+            import fitz  # PyMuPDF
+        except ImportError:
+            logger.error("PyMuPDF not installed. Cannot process PDF for signature detection.")
+            return []
+        
+        all_signatures = []
+        
+        # Создаем временную директорию для изображений страниц
+        with tempfile.TemporaryDirectory() as temp_dir:
+            try:
+                doc = fitz.open(pdf_path)
+                total_pages = len(doc)
+                
+                for page_num in range(total_pages):
+                    page = doc[page_num]
+                    
+                    # Конвертируем страницу в изображение
+                    mat = fitz.Matrix(2.0, 2.0)  # Хорошее разрешение для детекции
+                    pix = page.get_pixmap(matrix=mat, alpha=False)
+                    
+                    # Сохраняем временное изображение
+                    img_path = os.path.join(temp_dir, f"page_{page_num + 1}.png")
+                    pix.save(img_path)
+                    
+                    # Детектируем подписи на странице
+                    page_signatures = self.signature_detector.detect_signatures(img_path)
+                    
+                    # Добавляем информацию о странице к каждой подписи
+                    for sig in page_signatures:
+                        sig["page"] = page_num + 1
+                        sig["pdf_page"] = page_num
+                        all_signatures.append(sig)
+                
+                doc.close()
+                logger.info(f"Detected {len(all_signatures)} signatures in PDF with {total_pages} pages")
+                
+            except Exception as e:
+                logger.error(f"Error processing PDF for signature detection: {e}")
+                if 'doc' in locals():
+                    doc.close()
+        
+        return all_signatures
+
+    def extract_with_signatures(self, file_path: Union[str, Path]) -> Dict[str, Any]:
+        """
+        Extract text and detect signatures from a file.
+        
+        Args:
+            file_path: Path to the image or PDF file
+            
+        Returns:
+            Dictionary with text and signature information
+        """
+        text = self.extract_text(file_path)
+        signatures = self.detect_signatures(file_path)
+        
+        return {
+            "text": text,
+            "signatures": signatures,
+            "signature_count": len(signatures),
+            "has_signatures": len(signatures) > 0
+        }
 
     def _is_pdf(self, file_path: Union[str, Path]) -> bool:
         """Check if file is a PDF by extension."""

@@ -68,6 +68,12 @@ async function extractTextFromImage(file) {
         const formData = new FormData();
         formData.append('file', file);
         
+        // Check if signature detection is enabled
+        const detectSignatures = document.getElementById('detectSignaturesCheckbox').checked;
+        if (detectSignatures) {
+            formData.append('detect_signatures', 'true');
+        }
+        
         // Send to server
         const response = await fetch('/api/extract', {
             method: 'POST',
@@ -95,6 +101,40 @@ function displayResults(data) {
     document.getElementById('fileNameDisplay').textContent = `File: ${data.filename}`;
     extractedText.value = data.text;
     resultsSection.style.display = 'block';
+    
+    // Display signature results if available
+    const signatureResults = document.getElementById('signatureResults');
+    const signatureCount = document.getElementById('signatureCount');
+    const signatureList = document.getElementById('signatureList');
+    
+    if (data.signatures && data.signatures.length > 0) {
+        signatureResults.style.display = 'block';
+        signatureCount.textContent = `Found ${data.signature_count} signature(s):`;
+        
+        // Clear previous list
+        signatureList.innerHTML = '';
+        
+        // Add each signature to the list
+        data.signatures.forEach((sig, index) => {
+            const li = document.createElement('li');
+            li.className = 'signature-item';
+            
+            const x = sig.bbox[0];
+            const y = sig.bbox[1];
+            const w = sig.bbox[2];
+            const h = sig.bbox[3];
+            
+            li.innerHTML = `
+                <strong>Signature ${index + 1}</strong><br>
+                <span class="signature-coordinates">Position: (${x}, ${y}) - (${x + w}, ${y + h})</span><br>
+                <span class="signature-coordinates">Size: ${w}×${h} pixels, Area: ${Math.round(sig.area)} px²</span>
+            `;
+            
+            signatureList.appendChild(li);
+        });
+    } else {
+        signatureResults.style.display = 'none';
+    }
     
     // Scroll to results
     setTimeout(() => {
@@ -143,6 +183,14 @@ function resetForm() {
     resultsSection.style.display = 'none';
     errorMessage.style.display = 'none';
     extractedText.value = '';
+    
+    // Reset signature results
+    document.getElementById('signatureResults').style.display = 'none';
+    document.getElementById('signatureCount').textContent = '';
+    document.getElementById('signatureList').innerHTML = '';
+    
+    // Uncheck signature detection checkbox
+    document.getElementById('detectSignaturesCheckbox').checked = false;
     
     // Scroll to top
     uploadArea.scrollIntoView({ behavior: 'smooth' });

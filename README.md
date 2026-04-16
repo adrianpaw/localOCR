@@ -15,6 +15,9 @@ This project provides a Python-based OCR (Optical Character Recognition) system 
 - **Easy-to-Use API**: Simple Python interface for integration into other projects
 - **Multi-format Support**: Works with PNG, JPG, JPEG, BMP, GIF, WebP, and PDF files
 - **PDF Processing**: Extracts text from PDFs with text layers or converts scanned PDFs to images for OCR
+- **Signature Detection**: Computer vision-based signature detection using OpenCV
+- **Signature Extraction**: Extract signature regions from documents
+- **Web Interface**: User-friendly web UI for text extraction and signature detection
 
 ## Installation
 
@@ -132,14 +135,127 @@ Returns:
 ```bash
 POST /api/extract
 ```
-Request: multipart/form-data with `file` field
-Response:
+**Request Formats:**
+
+1. **Multipart Form Data** (traditional file upload):
+   - Content-Type: `multipart/form-data`
+   - Field: `file` (required) - the image/PDF file
+   - Parameter: `detect_signatures` (optional) - set to `true` to enable signature detection
+
+2. **JSON Body with Base64** (programmatic API):
+   - Content-Type: `application/json`
+   - JSON structure:
+   ```json
+   {
+     "file_base64": "base64-encoded-file-data",
+     "file_name": "optional_filename.png",
+     "file_extension": "optional_extension",
+     "detect_signatures": true
+   }
+   ```
+   - `file_base64`: Required base64-encoded file content (can include data URL prefix)
+   - `file_name`: Optional filename for reference
+   - `file_extension`: Optional file extension (default: 'png')
+   - `detect_signatures`: Optional boolean (default: false)
+
+**Response (without signature detection):**
 ```json
 {
     "success": true,
     "filename": "image.jpg",
     "text": "Extracted text content..."
 }
+```
+**Response (with signature detection):**
+```json
+{
+    "success": true,
+    "filename": "image.jpg",
+    "text": "Extracted text content...",
+    "signatures": [
+        {
+            "id": 0,
+            "bbox": [100, 200, 150, 50],
+            "area": 7500,
+            "aspect_ratio": 3.0,
+            "line_density": 0.18,
+            "solidity": 0.72,
+            "center": [175, 225]
+        }
+    ],
+    "signature_count": 1,
+    "has_signatures": true
+}
+```
+
+**Detect Signatures Only**
+```bash
+POST /api/detect-signatures
+```
+**Request Formats:**
+
+1. **Multipart Form Data**:
+   - Content-Type: `multipart/form-data`
+   - Field: `file` (required) - the image/PDF file
+
+2. **JSON Body with Base64**:
+   - Content-Type: `application/json`
+   - JSON structure:
+   ```json
+   {
+     "file_base64": "base64-encoded-file-data",
+     "file_name": "optional_filename.png"
+   }
+   ```
+
+**Response:**
+```json
+{
+    "success": true,
+    "filename": "image.jpg",
+    "signatures": [...],
+    "signature_count": 2,
+    "has_signatures": true
+}
+```
+
+### Signature Detection
+
+The system now includes computer vision-based signature detection using OpenCV. This feature can be used standalone or integrated with OCR text extraction.
+
+**Python API Example:**
+```python
+from localocr import OCRExtractor
+
+# Initialize extractor
+extractor = OCRExtractor(languages=['en', 'ru'])
+
+# Detect signatures only
+signatures = extractor.detect_signatures("document.png")
+print(f"Found {len(signatures)} signatures")
+
+# Extract text with signature detection
+result = extractor.extract_with_signatures("document.png")
+print(f"Text: {result['text'][:100]}...")
+print(f"Signatures: {result['signature_count']}")
+
+# Standalone signature detector
+from localocr.signature_detector import SignatureDetector
+detector = SignatureDetector()
+signatures = detector.detect_signatures("document.png")
+```
+
+**Signature Detection Parameters:**
+- `min_signature_area`: Minimum area in pixels (default: 500)
+- `max_signature_area`: Maximum area in pixels (default: 50000)
+- `aspect_ratio_range`: Acceptable width/height ratio (default: 0.3-3.0)
+- `line_density_threshold`: Minimum edge density (default: 0.15)
+- `solidity_threshold`: Minimum contour solidity (default: 0.5)
+
+**Demo Script:**
+Run the demonstration script to see signature detection in action:
+```bash
+python demo_signature_detection.py
 ```
 
 ## Project Structure
@@ -149,7 +265,8 @@ localOCR/
 ├── src/
 │   └── localocr/
 │       ├── __init__.py
-│       └── ocr.py          # Main OCR extractor module
+│       ├── ocr.py                 # Main OCR extractor module
+│       └── signature_detector.py  # Signature detection module
 ├── templates/
 │   └── index.html          # Web interface template
 ├── static/
@@ -157,6 +274,7 @@ localOCR/
 │   └── script.js           # Web interface JavaScript
 ├── main.py                 # CLI entry point
 ├── web.py                  # Flask web server
+├── demo_signature_detection.py  # Signature detection demo
 ├── pyproject.toml          # Project metadata and dependencies
 ├── requirements.txt        # Pip dependencies
 ├── README.md              # This file

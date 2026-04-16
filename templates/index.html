@@ -32,6 +32,17 @@
                     <input type="file" id="fileInput" accept="image/*,.pdf" style="display: none;">
                 </div>
                 <p class="file-info">Supported formats: PNG, JPG, JPEG, BMP, GIF, WebP, PDF (Max 50MB)</p>
+                
+                <!-- Signature detection option -->
+                <div class="options-section">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="detectSignaturesCheckbox">
+                        <span>Detect signatures</span>
+                    </label>
+                    <div class="tooltip">?
+                        <span class="tooltiptext">Enable computer vision-based signature detection in the document</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Progress Bar -->
@@ -55,6 +66,14 @@
                     <p id="fileNameDisplay"></p>
                     <textarea id="extractedText" readonly></textarea>
                 </div>
+                
+                <!-- Signature Results -->
+                <div class="signature-results" id="signatureResults" style="display: none;">
+                    <h3>Detected Signatures</h3>
+                    <div id="signatureCount"></div>
+                    <ul class="signature-list" id="signatureList"></ul>
+                </div>
+                
                 <div class="button-group">
                     <button class="btn btn-copy" onclick="copyText()">Copy to Clipboard</button>
                     <button class="btn btn-new" onclick="resetForm()">Extract Another Image</button>
