@@ -5,6 +5,7 @@ Flask web interface for localOCR
 import os
 import sys
 import json
+import logging
 from pathlib import Path
 
 # Add src directory to path so localocr can be imported
@@ -14,11 +15,23 @@ from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
 from localocr import OCRExtractor
 
+# Load environment variables (optional)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 app = Flask(__name__)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Configure JSON encoder to preserve Cyrillic characters
 app.json.ensure_ascii = False
-app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size
-app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_CONTENT_LENGTH_MB', 50)) * 1024 * 1024  # Default 50MB
+app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', 'uploads')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp', 'pdf'}
 
 # Create upload folder if it doesn't exist
@@ -34,10 +47,17 @@ def get_ocr_extractor():
     global ocr_extractor, model_error
     if ocr_extractor is None and model_error is None:
         try:
-            ocr_extractor = OCRExtractor()
+            # Read languages from environment variable
+            languages_str = os.getenv('OCR_LANGUAGES', 'en,ru')
+            languages = [lang.strip() for lang in languages_str.split(',') if lang.strip()]
+            gpu = os.getenv('OCR_GPU', 'true').lower() == 'true'
+            
+            logger.info(f"Initializing OCR extractor with languages: {languages}, GPU: {gpu}")
+            ocr_extractor = OCRExtractor(languages=languages, gpu=gpu)
+            logger.info("OCR extractor initialized successfully")
         except Exception as e:
             model_error = str(e)
-            print(f"Error loading OCR model: {model_error}")
+            logger.error(f"Error loading OCR model: {model_error}")
     return ocr_extractor
 
 
@@ -78,11 +98,15 @@ def extract_text():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
         
+        logger.info(f"Processing file: {filename}")
+        
         # Extract text
         text = extractor.extract_text(filepath)
         
         # Clean up
         os.remove(filepath)
+        
+        logger.info(f"Successfully extracted text from {filename}")
         
         return jsonify({
             'success': True,
@@ -91,6 +115,7 @@ def extract_text():
         }), 200
     
     except Exception as e:
+        logger.error(f"Error during text extraction: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 
@@ -111,11 +136,19 @@ def model_info():
         return jsonify({
             'loaded': True,
             'languages': extractor.languages,
-            'gpu': extractor.gpu
+            'gpu': extractor.gpu,
+            'model': 'EasyOCR'
         }), 200
     except Exception as e:
+        logger.error(f"Error in model-info endpoint: {str(e)}")
         return jsonify({'error': str(e), 'loaded': False}), 500
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Get host and port from environment variables (for production)
+    host = os.getenv('HOST', '0.0.0.0')
+    port = int(os.getenv('PORT', 5000))
+    debug = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
+    
+    logger.info(f"Starting server on {host}:{port} (debug={debug})")
+    app.run(host=host, port=port, debug=debug)

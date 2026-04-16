@@ -208,6 +208,66 @@ black src/ main.py
 isort src/ main.py
 ```
 
+## Deployment
+
+This application can be deployed to various cloud platforms. Below are instructions for popular hosting services.
+
+### Prerequisites
+
+1. Ensure your code is pushed to a Git repository (GitHub, GitLab, etc.)
+2. Have an account on the chosen hosting platform
+
+### Render.com (Recommended)
+
+1. **Create a new Web Service** on [Render](https://render.com)
+2. **Connect your repository**
+3. **Configure settings**:
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn web:app`
+   - **Environment Variables**: Add any needed variables from `.env.example`
+4. **Click Deploy**
+
+Render will automatically build and deploy your application. The first build may take longer due to downloading OCR models (~2GB).
+
+### Railway.app
+
+1. **Create a new project** on [Railway](https://railway.app)
+2. **Connect your repository**
+3. **Railway will automatically detect** the Python project and install dependencies
+4. **Add environment variables** if needed
+5. **Deploy**
+
+### PythonAnywhere
+
+1. **Create a new Web App** on [PythonAnywhere](https://pythonanywhere.com)
+2. **Upload your code** via Git or manual upload
+3. **Create a virtual environment** and install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. **Configure WSGI file** to point to `web:app`
+5. **Reload the application**
+
+### Environment Variables
+
+For production, set the following environment variables (optional):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `5000` | Port to listen on |
+| `HOST` | `0.0.0.0` | Host to bind to |
+| `OCR_LANGUAGES` | `en,ru` | Comma-separated language codes |
+| `OCR_GPU` | `true` | Whether to use GPU if available |
+| `MAX_CONTENT_LENGTH_MB` | `50` | Maximum upload size in MB |
+| `UPLOAD_FOLDER` | `uploads` | Temporary upload directory |
+| `FLASK_DEBUG` | `false` | Enable Flask debug mode |
+
+### Notes
+
+- The first request will trigger model download, which may take several minutes.
+- GPU acceleration may not be available on all hosting platforms.
+- For large files, ensure sufficient memory and disk space.
+
 ## License
 
 [Specify your license here]

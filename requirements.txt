@@ -8,14 +8,17 @@ opencv-python-headless>=4.8.0
 # PDF processing (using PyMuPDF instead of pdf2image + poppler)
 PyMuPDF>=1.23.0
 
-# HuggingFace transformers from git (optional, kept for compatibility)
-git+https://github.com/huggingface/transformers.git
-
 # Web interface
 Flask>=2.3.0
 Werkzeug>=2.3.0
 
-# Development dependencies
+# Production server
+gunicorn>=21.0.0
+
+# Environment variables (optional)
+python-dotenv>=1.0.0
+
+# Development dependencies (optional)
 pytest>=7.0
 black>=22.0
 isort>=5.0
