@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "localocr"
+version = "0.1.0"
+description = "Local OCR text extraction from images using HuggingFace GLM-OCR model"
+requires-python = ">=3.8"
+dependencies = [
+    "transformers @ git+https://github.com/huggingface/transformers.git",
+    "torch>=2.0.0",
+    "Pillow>=9.0.0",
+    "numpy>=1.21.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "black>=22.0",
+    "isort>=5.0",
+]
+
+[tool.black]
+line-length = 100
+
+[tool.isort]
+profile = "black"
+line_length = 100

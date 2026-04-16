@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>localOCR - Text Extraction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>localOCR</h1>
+            <p class="subtitle">Extract text from images and PDFs locally</p>
+        </header>
+
+        <div class="info-box" id="modelInfo" style="display: none;">
+            <p><strong>Languages:</strong> <span id="modelName"></span></p>
+            <p><strong>Hardware:</strong> <span id="deviceType"></span></p>
+        </div>
+
+        <main class="main-content">
+            <!-- Upload Area -->
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <h2>Drop your image or PDF here</h2>
+                    <p>or click to select a file</p>
+                    <input type="file" id="fileInput" accept="image/*,.pdf" style="display: none;">
+                </div>
+                <p class="file-info">Supported formats: PNG, JPG, JPEG, BMP, GIF, WebP, PDF (Max 50MB)</p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-container" id="progressContainer" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p id="progressText">Processing your image...</p>
+            </div>
+
+            <!-- Error Message -->
+            <div class="error-message" id="errorMessage" style="display: none;">
+                <span id="errorText"></span>
+                <button class="close-btn" onclick="closeError()">×</button>
+            </div>
+
+            <!-- Results Area -->
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <h2>Extracted Text</h2>
+                <div class="results-box">
+                    <p id="fileNameDisplay"></p>
+                    <textarea id="extractedText" readonly></textarea>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-copy" onclick="copyText()">Copy to Clipboard</button>
+                    <button class="btn btn-new" onclick="resetForm()">Extract Another Image</button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>localOCR - Local OCR text extraction using GLM-OCR</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

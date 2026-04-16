@@ -1,0 +1,21 @@
+# Core dependencies
+torch>=2.0.0
+Pillow>=9.0.0
+numpy>=1.21.0
+easyocr>=1.7.0
+opencv-python-headless>=4.8.0
+
+# PDF processing (using PyMuPDF instead of pdf2image + poppler)
+PyMuPDF>=1.23.0
+
+# HuggingFace transformers from git (optional, kept for compatibility)
+git+https://github.com/huggingface/transformers.git
+
+# Web interface
+Flask>=2.3.0
+Werkzeug>=2.3.0
+
+# Development dependencies
+pytest>=7.0
+black>=22.0
+isort>=5.0
